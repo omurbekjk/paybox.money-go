@@ -25,7 +25,6 @@ const (
 	SaltLength         = 32
 )
 
-// swagger:model
 type Client interface {
 	GeneratePayment(*GeneratePaymentRequest) (*GeneratePaymentResponse, error)
 }
@@ -41,12 +40,13 @@ type client struct {
 // NewClient returns new Client
 // APIBase is a base API URL
 func NewClient(APIBaseURL string, merchantID string, merchantSecret string, merchantSecretPayout string) (Client, error) {
-	if merchantID == "" || merchantSecret == "" || merchantSecretPayout == "" || APIBaseURL == "" {
-		return nil, errors.New("ClientID, Secret and APIBaseURL are required to create a Client")
+	if APIBaseURL == "" || merchantID == "" || merchantSecret == "" {
+		return nil, errors.New("APIBaseURL, merchantID and merchantSecret are required to create a client")
 	}
+
 	c := client{
 		httpClient: &http.Client{
-			Timeout: time.Second * 60,
+			Timeout: time.Second * 30,
 		},
 		apiBaseURL:           strings.TrimRight(APIBaseURL, "/"),
 		merchantID:           merchantID,
@@ -56,7 +56,7 @@ func NewClient(APIBaseURL string, merchantID string, merchantSecret string, merc
 	return &c, nil
 }
 
-func (c *client) GeneratePayment(request *GeneratePaymentRequest) (resp *GeneratePaymentResponse, err error) {
+func (c *client) GeneratePayment(request *GeneratePaymentRequest) (*GeneratePaymentResponse, error) {
 	request.PgMerchantId = c.merchantID
 	randomStr, err := GenerateRandomString(SaltLength)
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *client) GeneratePayment(request *GeneratePaymentRequest) (resp *Generat
 // path may contain query string parameters.
 // This stores the response of the request into the value pointed to by v.
 func (c *client) performRequest(method, path string, requestBody io.Reader, v interface{}) error {
-	req, err := http.NewRequest(method, c.cspEndpoint(path), requestBody)
+	req, err := http.NewRequest(method, c.payboxEndpoint(path), requestBody)
 	if err != nil {
 		return err
 	}
@@ -105,9 +105,9 @@ func (c *client) performRequest(method, path string, requestBody io.Reader, v in
 	return err
 }
 
-// cspEndpoint generates a csp endpoint by appending the specified path to the provided hostname for the client
+// payboxEndpoint generates a paybox endpoint by appending the specified path to the provided hostname for the client
 // path may contain query string parameters.
-func (c *client) cspEndpoint(path string) string {
+func (c *client) payboxEndpoint(path string) string {
 	return fmt.Sprintf("%s%s", c.apiBaseURL, path)
 }
 

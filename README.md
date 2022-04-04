@@ -1,5 +1,8 @@
 # Go client for paybox.money
 
+## Paybox.money
+https://paybox.money/docs/
+
 ## Install
 
 ```
@@ -11,7 +14,7 @@ go mod vendor
 ## Usage
 
 ```go
-client, err := NewClient("https://api.paybox.money", "merchantId", "merchantSecret", "test")
+payboxClient, err := NewClient("https://api.paybox.money", "merchantId", "merchantSecret", "test")
 if err != nil {
     t.Fatalf("unexpected error %s", err.Error())
 }
@@ -23,10 +26,15 @@ paymentRequest := &GeneratePaymentRequest{
     PgTestingMode:   "1",
     PgRequestMethod: "POST",
 }
-response, err := client.GeneratePayment(paymentRequest)
+response, err := payboxClient.GeneratePayment(paymentRequest)
 if err != nil {
     t.Fatalf("unexpected error %s", err.Error())
 }
 fmt.Println(*response.PgRedirectUrl)
 ```
 
+## Todo
+
+- [ ] Enable/Disable testing mode
+- [ ] Cover with tests
+- [ ] etc...
