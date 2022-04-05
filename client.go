@@ -21,12 +21,14 @@ import (
 )
 
 const (
-	EndpointScriptName = "init_payment.php"
-	SaltLength         = 32
+	EndpointInitScriptName   = "init_payment.php"
+	EndpointStatusScriptName = "get_status.php"
+	SaltLength               = 32
 )
 
 type Client interface {
-	GeneratePayment(*GeneratePaymentRequest) (*GeneratePaymentResponse, error)
+	GeneratePayment(request *GeneratePaymentRequest) (*GeneratePaymentResponse, error)
+	GetPaymentStatus(request *PaymentStatusRequest) (*PaymentStatusResponse, error)
 }
 
 type client struct {
@@ -63,11 +65,26 @@ func (c *client) GeneratePayment(request *GeneratePaymentRequest) (*GeneratePaym
 		return nil, err
 	}
 	request.PgSalt = randomStr
-	request.PgSig = c.generateSignature(*request)
+	request.PgSig = c.generateSignature(*request, EndpointInitScriptName)
 
 	r, _ := json.Marshal(request)
 	var response GeneratePaymentResponse
-	err = c.performRequest("POST", "/"+EndpointScriptName, bytes.NewReader(r), &response)
+	err = c.performRequest("POST", "/"+EndpointInitScriptName, bytes.NewReader(r), &response)
+	return &response, err
+}
+
+func (c *client) GetPaymentStatus(request *PaymentStatusRequest) (*PaymentStatusResponse, error) {
+	num, _ := strconv.Atoi(c.merchantID)
+	request.PgMerchantId = num
+	randomStr, err := GenerateRandomString(SaltLength)
+	if err != nil {
+		return nil, err
+	}
+	request.PgSalt = randomStr
+	request.PgSig = c.generateSignature(*request, EndpointStatusScriptName)
+	r, _ := json.Marshal(request)
+	var response PaymentStatusResponse
+	err = c.performRequest("POST", "/"+EndpointStatusScriptName, bytes.NewReader(r), &response)
 	return &response, err
 }
 
@@ -111,8 +128,8 @@ func (c *client) payboxEndpoint(path string) string {
 	return fmt.Sprintf("%s%s", c.apiBaseURL, path)
 }
 
-func (c *client) generateSignature(request GeneratePaymentRequest) string {
-	signature := []string{EndpointScriptName}
+func (c *client) generateSignature(request interface{}, scriptname string) string {
+	signature := []string{scriptname}
 
 	keys := sortedKeysArray(request)
 	ref := reflect.ValueOf(request)

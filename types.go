@@ -87,3 +87,26 @@ type PaymentResultResponse struct {
 	PgSalt        *string        `xml:"pg_salt,omitempty"`
 	PgSig         *string        `xml:"pg_sig,omitempty"`
 }
+
+// PaymentStatusRequest -
+// swagger:model
+type PaymentStatusRequest struct {
+	PgMerchantId int    `json:"pg_merchant_id,omitempty"`
+	PgPaymentId  int    `json:"pg_payment_id,omitempty"`
+	PgOrderId    string `json:"pg_order_id,omitempty"`
+	PgSalt       string `json:"pg_salt,omitempty"`
+	PgSig        string `json:"pg_sig,omitempty"`
+}
+
+// PaymentStatusResponse -
+// swagger:model
+type PaymentStatusResponse struct {
+	PgStatus            *PaymentStatus `xml:"pg_status,omitempty"`
+	PgPaymentId         *int           `xml:"pg_payment_id,omitempty"`
+	PgTransactionStatus *string        `xml:"pg_transaction_status,omitempty"`
+	PgCanReject         *int           `xml:"pg_can_reject,omitempty"`
+	PgCaptured          *string        `xml:"pg_captured,omitempty"`
+	PgCreateDate        *string        `xml:"pg_create_date,omitempty"`
+	PgSalt              *string        `xml:"pg_salt,omitempty"`
+	PgSig               *string        `xml:"pg_sig,omitempty"`
+}
