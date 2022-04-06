@@ -33,12 +33,12 @@ func TestClientGeneratePayment(t *testing.T) {
 }
 
 func TestClientGetPaymentStatus(t *testing.T) {
-	client, err := NewClient("https://api.paybox.money/", "542185", "7wnP659u3v9J8jbG", "test")
+	client, err := NewClient("https://api.paybox.money/", "merchantId", "merchantSecretKey", "test")
 	if err != nil {
 		t.Fatalf("unexpected error %s", err.Error())
 	}
 	paymentRequest := &PaymentStatusRequest{
-		PgPaymentId: 571446375,
+		PgPaymentId: 0,
 		PgOrderId:   "Shuma",
 		PgSalt:      "",
 		PgSig:       "",
