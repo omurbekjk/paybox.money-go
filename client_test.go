@@ -31,3 +31,21 @@ func TestClientGeneratePayment(t *testing.T) {
 	}
 	fmt.Println(*response.PgRedirectUrl)
 }
+
+func TestClientGetPaymentStatus(t *testing.T) {
+	client, err := NewClient("https://api.paybox.money/", "merchantId", "merchantSecretKey", "test")
+	if err != nil {
+		t.Fatalf("unexpected error %s", err.Error())
+	}
+	paymentRequest := &PaymentStatusRequest{
+		PgPaymentId: 0,
+		PgOrderId:   "Shuma",
+		PgSalt:      "",
+		PgSig:       "",
+	}
+	response, err := client.GetPaymentStatus(paymentRequest)
+	if err != nil {
+		t.Fatalf("unexpected error %s", err.Error())
+	}
+	fmt.Println(*response)
+}
